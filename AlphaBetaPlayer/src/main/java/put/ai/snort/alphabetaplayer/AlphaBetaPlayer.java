@@ -95,7 +95,7 @@ public class AlphaBetaPlayer extends Player {
 		Board tmpBoard = board.clone();
 		for(Move move : moves) {
 			tmpBoard.doMove(move);
-			int value = AlphaBetaNS(board.clone(), getColor(), 4, -99999, 99999);
+			int value = Math.abs(AlphaBetaNS(tmpBoard, getOpponent(getColor()), 4, -99999, 99999));
 			//System.out.println(String.format("%s: %d", move, value));
 			if(value > bestValue) {
 				bestMove = move;
