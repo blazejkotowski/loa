@@ -1,7 +1,5 @@
 package put.ai.snort.alphabetaplayer;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
@@ -14,26 +12,35 @@ public class AlphaBetaPlayer extends Player {
 	private static Integer[][] matrix = null;
 	private Random random=new Random(0xdeadbeef);
 	
-	public int AlphaBeta(Board board, Color color, int depth, int alpha, int beta) {
+	public int AlphaBetaNS(Board board, Color color, int depth, int alpha, int beta) {
 
-		if (board.getWinner() != null || depth == 0) {
+		if (depth == 0) {
 			return eval(board);	
 		}
 		
-		int val;
-		//Color color = (initDepth - depth) % 2 == 0 ? getColor() : getOpponent(getColor());
+		if (board.getWinner() == color) {
+			return eval(board) + 100;
+		}
+		
+		int val = -9999, cur, n = beta;
+
 		for (Move leaf : board.getMovesFor(color)) {
 			board.doMove(leaf);
-			val = -AlphaBeta(board, getOpponent(color), depth-1, -beta, -alpha);
+			cur = -AlphaBetaNS(board, getOpponent(color), depth-1, -n, -alpha);
+			if (cur > val) {
+				val = (n == beta || depth <= 2) ? cur : -AlphaBetaNS(board, getOpponent(color), depth-1, -beta, -cur);
+			}
 			board.undoMove(leaf);
-			if (val > alpha) {
+
+			if (val > alpha) 
 				alpha = val;
-			}
-			if (alpha >= beta) {
-				return beta;
-			}
+
+			if (alpha >= beta) 
+				return alpha;
+
+			n = alpha + 1;
 		}
-		return alpha;
+		return val;
 	}
 	
 	private static void generateValues(Board b) {
@@ -88,8 +95,8 @@ public class AlphaBetaPlayer extends Player {
 		Board tmpBoard = board.clone();
 		for(Move move : moves) {
 			tmpBoard.doMove(move);
-			int value = AlphaBeta(board.clone(), getColor(), 7, -99999, 99999);
-			System.out.println(String.format("%s: %d", move, value));
+			int value = AlphaBetaNS(board.clone(), getColor(), 4, -99999, 99999);
+			//System.out.println(String.format("%s: %d", move, value));
 			if(value > bestValue) {
 				bestMove = move;
 				bestValue = value;
