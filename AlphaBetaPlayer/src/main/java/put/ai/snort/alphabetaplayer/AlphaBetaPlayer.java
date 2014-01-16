@@ -82,12 +82,6 @@ public class AlphaBetaPlayer extends Player {
 			}
 		}
 		matrix[0][0] = matrix[0][bs-1] = matrix[bs-1][0] = matrix[bs-1][bs-1] = 0;
-		for(int i=0; i<bs; ++i) {
-			for(int j=0; j < bs; ++j) {
-				System.out.print(getValue(i,j));
-			}
-			System.out.println();
-		}
 	}
 	
 	@Override
