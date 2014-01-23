@@ -1,11 +1,13 @@
 package put.ai.snort.alphabetaplayer;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
 import put.ai.snort.game.Board;
 import put.ai.snort.game.Move;
 import put.ai.snort.game.Player;
+import put.ai.snort.game.Player.Color;
 import put.ai.snort.game.moves.MoveMove;
 
 public class AlphaBetaPlayer extends Player {
@@ -39,7 +41,7 @@ public class AlphaBetaPlayer extends Player {
 		
 		int val = -9999, cur, n = beta;
 
-		for (Move leaf : board.getMovesFor(color)) {
+		for (Move leaf : getMovesFor(board, color)) {
 			if(movePossible(board, leaf)) {
 				lastBoard = board.clone();
 				lastMove = (MoveMove) leaf;
@@ -84,6 +86,21 @@ public class AlphaBetaPlayer extends Player {
 		matrix[0][0] = matrix[0][bs-1] = matrix[bs-1][0] = matrix[bs-1][bs-1] = 0;
 	}
 	
+	List<Move> getMovesFor(Board board, Color color) {
+		List<Move> moves = board.getMovesFor(color);
+		int maxVal = -9999, maxIndex = 0, tmp;
+		for (int i = 0; i < moves.size(); ++i) {
+			board.doMove(moves.get(i));
+			if ((tmp = eval(board)) > maxVal) {
+				maxVal = tmp;
+				maxIndex = i;
+			}
+			board.undoMove(moves.get(i));
+		}
+		Collections.swap(moves, 0, maxIndex);
+		return moves;
+	}
+	
 	@Override
 	public String getName() {
 		return "Piotr & Blazej";
@@ -112,10 +129,11 @@ public class AlphaBetaPlayer extends Player {
 	@Override
 	public Move nextMove(Board board) {
 		if(matrix == null) generateValues(board);
-		List<Move> moves = board.getMovesFor(getColor());
+		Board tmpBoard = board.clone();
+		//List<Move> moves = board.getMovesFor(getColor());
+		List<Move> moves = getMovesFor(tmpBoard, getColor());
 		Move bestMove = null;
 		int bestValue = -10000;
-		Board tmpBoard = board.clone();
 		initialDepth = 4;
 		for(Move move : moves) {
 			if(movePossible(tmpBoard, move)) {
